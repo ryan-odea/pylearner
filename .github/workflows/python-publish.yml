@@ -86,6 +86,7 @@ jobs:
   pypi-publish:
     runs-on: ubuntu-latest
     needs: build_wheels
+    environment: pypi
     steps:
       - name: Create combined wheels directory
         run: mkdir -p combined_wheels

@@ -26,9 +26,9 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_BEFORE_BUILD: "yum -y install eigen3-devel || true"
           EIGEN3_INCLUDE_DIR: /usr/include/eigen3
-          CIBW_BUILD: cp3*
-          #Skipping 32bit architectures
-          CIBW_SKIP: cp36-manylinux_i686* cp37-manylinux_i686* cp38-manylinux_i686* cp39-manylinux_i686* cp310-manylinux_i686* cp311-manylinux_i686* cp312-manylinux_i686* cp313-manylinux_i686*
+          # Build only CPython versions 3.9 and above.
+          CIBW_BUILD: "cp39* cp310* cp311* cp312* cp313*"
+          CIBW_SKIP: "cp36-* cp37-* cp38-*"
         run: cibuildwheel --output-dir wheelhouse .
 
       - name: Upload wheels artifact

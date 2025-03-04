@@ -1,4 +1,4 @@
-name: pylearner
+name: learner_py
 
 on:
   release:
@@ -11,15 +11,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # [[Debug]]: list the vendored Eigen directory
-      - name: List vendored Eigen directory
+      - name: List host Eigen directories
         run: |
-          if [ -d vendor/eigen3 ]; then
-              echo "Found vendored Eigen at vendor/eigen3"
-              ls vendor/eigen3
-          else
-              echo "Vendored Eigen not found!"
-          fi
+          echo "Listing /usr/include/eigen3:"
+          ls /usr/include/eigen3 || echo "Not found"
+          echo "Listing /usr/local/include/eigen3:"
+          ls /usr/local/include/eigen3 || echo "Not found"
 
       - name: Install cibuildwheel
         run: pip install cibuildwheel
@@ -27,7 +24,8 @@ jobs:
       - name: Build manylinux wheels with cibuildwheel
         env:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
-          EIGEN3_INCLUDE_DIR: ${{ github.workspace }}/vendor/eigen3
+          CIBW_BEFORE_BUILD: "yum -y install eigen3-devel"
+          EIGEN3_INCLUDE_DIR: /usr/include/eigen3
           CIBW_BUILD: cp3*
         run: cibuildwheel --output-dir wheelhouse .
 

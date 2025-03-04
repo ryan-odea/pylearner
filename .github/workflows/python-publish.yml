@@ -17,7 +17,7 @@ jobs:
       - name: Install cibuildwheel
         run: pip install cibuildwheel
 
-      - name: Install Eigen and libomp on macOS
+      - name: Install dependencies on macOS
         if: runner.os == 'macOS'
         run: |
           brew update
@@ -37,13 +37,14 @@ jobs:
             Write-Host "Eigen already exists."
           }
 
+      # macOS build: Force x86_64 and set OpenMP flags using libomp from Homebrew.
       - name: Build wheels with cibuildwheel (macOS)
         if: matrix.os == 'macos-latest'
         env:
           CIBW_ARCHS: x86_64
-          CFLAGS: "-Xpreprocessor -fopenmp -I/opt/homebrew/include"
-          CXXFLAGS: "-Xpreprocessor -fopenmp -I/opt/homebrew/include"
-          LDFLAGS: "-L/opt/homebrew/lib -lomp"
+          CFLAGS: "-Xpreprocessor -fopenmp -I/opt/homebrew/opt/libomp/include"
+          CXXFLAGS: "-Xpreprocessor -fopenmp -I/opt/homebrew/opt/libomp/include"
+          LDFLAGS: "-L/opt/homebrew/opt/libomp/lib -lomp"
           CIBW_MANYLINUX_X86_64_IMAGE: ""
           CIBW_BEFORE_BUILD: ""
           EIGEN3_INCLUDE_DIR: "${{ github.workspace }}/vendor/eigen3"
@@ -52,16 +53,29 @@ jobs:
         run: cibuildwheel --output-dir wheelhouse .
         shell: bash
 
-      - name: Build wheels with cibuildwheel (Non-macOS)
-        if: matrix.os != 'macos-latest'
+      # Ubuntu build step.
+      - name: Build wheels with cibuildwheel (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
         env:
-          CIBW_MANYLINUX_X86_64_IMAGE: "${{ matrix.os == 'ubuntu-latest' && 'manylinux_2_28' || '' }}"
-          CIBW_BEFORE_BUILD: "${{ matrix.os == 'ubuntu-latest' && 'yum -y install eigen3-devel || true' || '' }}"
+          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_28"
+          CIBW_BEFORE_BUILD: "yum -y install eigen3-devel || true"
           EIGEN3_INCLUDE_DIR: "${{ github.workspace }}/vendor/eigen3"
           CIBW_BUILD: "cp39* cp310* cp311* cp312* cp313*"
-          CIBW_SKIP: "${{ matrix.os == 'ubuntu-latest' && 'cp39-manylinux_i686* cp310-manylinux_i686* cp311-manylinux_i686* cp312-manylinux_i686* cp313-manylinux_i686*' || '' }}"
+          CIBW_SKIP: "cp39-manylinux_i686* cp310-manylinux_i686* cp311-manylinux_i686* cp312-manylinux_i686* cp313-manylinux_i686*"
         run: cibuildwheel --output-dir wheelhouse .
         shell: bash
+
+      # Windows build step: Force amd64 and skip win32 builds.
+      - name: Build wheels with cibuildwheel (Windows)
+        if: matrix.os == 'windows-latest'
+        env:
+          CIBW_ARCHS: "amd64"
+          CIBW_MANYLINUX_X86_64_IMAGE: ""
+          CIBW_BEFORE_BUILD: ""
+          EIGEN3_INCLUDE_DIR: "${{ github.workspace }}/vendor/eigen3"
+          CIBW_BUILD: "cp39* cp310* cp311* cp312* cp313*"
+          CIBW_SKIP: "cp*-win32"
+        run: cibuildwheel --output-dir wheelhouse .
 
       - name: Upload wheels artifact
         uses: actions/upload-artifact@v4

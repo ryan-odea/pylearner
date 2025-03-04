@@ -22,6 +22,7 @@ jobs:
         run: |
           brew update
           brew install eigen
+          brew install libomp
 
       - name: Build wheels with cibuildwheel (macOS)
         if: matrix.os == 'macos-latest'

@@ -1,8 +1,8 @@
 name: learner-py
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [ "build-wheels-branch" ]
 
 jobs:
   build_wheels:
@@ -19,12 +19,12 @@ jobs:
 
       - name: Build wheels with cibuildwheel
         env:
-          CIBW_MANYLINUX_X86_64_IMAGE: "${{ matrix.os == 'ubuntu-latest' && 'manylinux_2_28' || '' }}"
-          CIBW_BEFORE_BUILD: "${{ matrix.os == 'ubuntu-latest' && 'yum -y install eigen3-devel || true' || '' }}"
+          CIBW_MANYLINUX_X86_64_IMAGE: "${{ matrix.os == 'ubuntu-latest' ? 'manylinux_2_28' : '' }}"
+          CIBW_BEFORE_BUILD: "${{ matrix.os == 'ubuntu-latest' ? 'yum -y install eigen3-devel || true' : '' }}"
           EIGEN3_INCLUDE_DIR: "${{ github.workspace }}/vendor/eigen3"
           CIBW_BUILD: "cp39* cp310* cp311* cp312* cp313*"
-          CIBW_SKIP: "${{ matrix.os == 'ubuntu-latest' && 'cp39-manylinux_i686* cp310-manylinux_i686* cp311-manylinux_i686* cp312-manylinux_i686* cp313-manylinux_i686*' || '' }}"
-        run: cibuildwheel --output-dir wheelhouse --verbose .
+          CIBW_SKIP: "${{ matrix.os == 'ubuntu-latest' ? 'cp39-manylinux_i686* cp310-manylinux_i686* cp311-manylinux_i686* cp312-manylinux_i686* cp313-manylinux_i686*' : '' }}"
+        run: cibuildwheel --output-dir wheelhouse .
 
       - name: Upload wheels artifact
         uses: actions/upload-artifact@v4

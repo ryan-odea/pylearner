@@ -11,13 +11,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # [[Debug]]: list the vendored Eigen directory
+      - name: Debug: List vendored Eigen directory
+        run: |
+          if [ -d vendor/eigen3 ]; then
+              echo "Found vendored Eigen at vendor/eigen3"
+              ls vendor/eigen3
+          else
+              echo "Vendored Eigen not found!"
+          fi
+
       - name: Install cibuildwheel
         run: pip install cibuildwheel
 
       - name: Build manylinux wheels with cibuildwheel
         env:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
-          EIGEN3_INCLUDE_DIR: /usr/include/eigen3
+          EIGEN3_INCLUDE_DIR: ${{ github.workspace }}/vendor/eigen3
           CIBW_BUILD: cp3*
         run: cibuildwheel --output-dir wheelhouse .
 
@@ -43,5 +53,8 @@ jobs:
 
       - name: Publish wheels to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: wheelhouse
+
         with:
           packages-dir: wheelhouse

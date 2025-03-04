@@ -21,26 +21,29 @@ else:
     extra_compile_args = ['-O3', '-std=c++14', '-fopenmp']
     extra_link_args = ['-fopenmp']
 
-eigen_include_dir = os.getenv("EIGEN3_INCLUDE_DIR")
-if eigen_include_dir and os.path.exists(eigen_include_dir):
-    pass
+vendored_eigen = os.path.join(os.path.dirname(__file__), "vendor", "eigen3")
+if os.path.exists(vendored_eigen):
+    eigen_include_dir = vendored_eigen
+    print(f"Using vendored Eigen directory: {eigen_include_dir}")
 else:
-
-    possible_paths = [
-        "/opt/homebrew/include/eigen3",    # macOS Homebrew (Apple Silicon)
-        "/usr/local/include/eigen3",       # macOS Intel
-        "/usr/include/eigen3"              # Linux
-    ]
-    eigen_include_dir = None
-    for path in possible_paths:
-        if os.path.exists(path):
-            eigen_include_dir = path
-            break
-
-if eigen_include_dir:
-    print(f"Using Eigen directory: {eigen_include_dir}")
-else:
-    print("Warning: Could not locate Eigen directory. Please ensure Eigen is installed.")
+    eigen_include_dir = os.getenv("EIGEN3_INCLUDE_DIR")
+    if eigen_include_dir and os.path.exists(eigen_include_dir):
+        print(f"Using Eigen directory from EIGEN3_INCLUDE_DIR: {eigen_include_dir}")
+    else:
+        possible_paths = [
+            "/opt/homebrew/include/eigen3",  # macOS Homebrew (Apple Silicon)
+            "/usr/local/include/eigen3",       # macOS Intel
+            "/usr/include/eigen3"              # Linux
+        ]
+        eigen_include_dir = None
+        for path in possible_paths:
+            if os.path.exists(path):
+                eigen_include_dir = path
+                break
+        if eigen_include_dir:
+            print(f"Using system Eigen directory: {eigen_include_dir}")
+        else:
+            print("Warning: Could not locate Eigen directory. Please vendor Eigen or ensure it is installed.")
 
 include_dirs = [
     get_pybind_include(),
@@ -89,4 +92,3 @@ setup(
     cmdclass={'build_ext': build_ext},
     zip_safe=False
 )
-

@@ -3,6 +3,9 @@ name: learner-py
 on:
   release:
     types: [published]
+    
+permissions:
+  id-token: write
 
 jobs:
   build_wheels:

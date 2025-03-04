@@ -65,11 +65,11 @@ jobs:
         run: cibuildwheel --output-dir wheelhouse .
         shell: bash
 
-      # Windows build step: Force amd64 and skip win32 builds.
+      # Windows build step: Force x86_64 and skip win32 builds.
       - name: Build wheels with cibuildwheel (Windows)
         if: matrix.os == 'windows-latest'
         env:
-          CIBW_ARCHS: "amd64"
+          CIBW_ARCHS: "x86_64"
           CIBW_MANYLINUX_X86_64_IMAGE: ""
           CIBW_BEFORE_BUILD: ""
           EIGEN3_INCLUDE_DIR: "${{ github.workspace }}/vendor/eigen3"

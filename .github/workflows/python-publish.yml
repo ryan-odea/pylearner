@@ -8,7 +8,17 @@ jobs:
   build_wheels:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: macos-latest
+            variant: macos
+          - os: windows-latest
+            variant: windows
+          - os: ubuntu-latest
+            variant: devel
+          - os: ubuntu-latest
+            variant: release
+          - os: ubuntu-latest
+            variant: oldrel-1
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
@@ -17,6 +27,7 @@ jobs:
       - name: Install cibuildwheel
         run: pip install cibuildwheel
 
+      # macOS dependencies
       - name: Install dependencies on macOS
         if: runner.os == 'macOS'
         run: |
@@ -24,6 +35,7 @@ jobs:
           brew install eigen
           brew install libomp
 
+      # Windows: Download Eigen if not already vendored
       - name: Download Eigen on Windows
         if: runner.os == 'Windows'
         shell: pwsh
@@ -37,7 +49,7 @@ jobs:
             Write-Host "Eigen already exists."
           }
 
-      # macOS build: Force x86_64 and set OpenMP flags.
+      # macOS build step
       - name: Build wheels with cibuildwheel (macOS)
         if: matrix.os == 'macos-latest'
         env:
@@ -53,19 +65,20 @@ jobs:
         run: cibuildwheel --output-dir wheelhouse .
         shell: bash
 
-      # Ubuntu build step.
+      # Ubuntu build step (for all Ubuntu variants)
       - name: Build wheels with cibuildwheel (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         env:
-          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_28"
-          CIBW_BEFORE_BUILD: "yum -y install eigen3-devel || true"
+          # Use a different manylinux image if the variant is "oldrel-1"
+          CIBW_MANYLINUX_X86_64_IMAGE: "${{ matrix.os == 'ubuntu-latest' && (matrix.variant == 'oldrel-1' && 'manylinux_2_24' || 'manylinux_2_28') || '' }}"
+          CIBW_BEFORE_BUILD: "${{ matrix.os == 'ubuntu-latest' && 'yum -y install eigen3-devel || true' || '' }}"
           EIGEN3_INCLUDE_DIR: "${{ github.workspace }}/vendor/eigen3"
           CIBW_BUILD: "cp39* cp310* cp311* cp312* cp313*"
           CIBW_SKIP: "cp39-manylinux_i686* cp310-manylinux_i686* cp311-manylinux_i686* cp312-manylinux_i686* cp313-manylinux_i686*"
         run: cibuildwheel --output-dir wheelhouse .
         shell: bash
 
-      # Windows build step: Force AMD64 and skip win32 builds.
+      # Windows build step
       - name: Build wheels with cibuildwheel (Windows)
         if: matrix.os == 'windows-latest'
         env:
@@ -80,7 +93,7 @@ jobs:
       - name: Upload wheels artifact
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.os }}
+          name: wheels-${{ matrix.os }}-${{ matrix.variant }}
           path: wheelhouse
 
   pypi-publish:
@@ -90,22 +103,34 @@ jobs:
       - name: Create combined wheels directory
         run: mkdir -p combined_wheels
 
-      - name: Download wheels artifact from Ubuntu
-        uses: actions/download-artifact@v4
-        with:
-          name: wheels-ubuntu-latest
-          path: combined_wheels
-
       - name: Download wheels artifact from macOS
         uses: actions/download-artifact@v4
         with:
-          name: wheels-macos-latest
+          name: wheels-macos-latest-macos
           path: combined_wheels
 
       - name: Download wheels artifact from Windows
         uses: actions/download-artifact@v4
         with:
-          name: wheels-windows-latest
+          name: wheels-windows-latest-windows
+          path: combined_wheels
+
+      - name: Download wheels artifact from Ubuntu devel
+        uses: actions/download-artifact@v4
+        with:
+          name: wheels-ubuntu-latest-devel
+          path: combined_wheels
+
+      - name: Download wheels artifact from Ubuntu release
+        uses: actions/download-artifact@v4
+        with:
+          name: wheels-ubuntu-latest-release
+          path: combined_wheels
+
+      - name: Download wheels artifact from Ubuntu oldrel-1
+        uses: actions/download-artifact@v4
+        with:
+          name: wheels-ubuntu-latest-oldrel-1
           path: combined_wheels
 
       - name: Publish wheels to PyPI

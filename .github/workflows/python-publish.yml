@@ -2,7 +2,7 @@ name: learner-py
 
 on:
   push:
-    branches: [ "build-wheels-branch" ]
+    branches: ["build-wheels-branch"]
 
 jobs:
   build_wheels:
@@ -14,16 +14,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set OS-specific environment variables
+        run: |
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            echo "CIBW_MANYLINUX_X86_64_IMAGE=manylinux_2_28" >> $GITHUB_ENV
+            echo "CIBW_BEFORE_BUILD=yum -y install eigen3-devel || true" >> $GITHUB_ENV
+            echo "CIBW_SKIP=cp39-manylinux_i686* cp310-manylinux_i686* cp311-manylinux_i686* cp312-manylinux_i686* cp313-manylinux_i686*" >> $GITHUB_ENV
+          else
+            echo "CIBW_MANYLINUX_X86_64_IMAGE=" >> $GITHUB_ENV
+            echo "CIBW_BEFORE_BUILD=" >> $GITHUB_ENV
+            echo "CIBW_SKIP=" >> $GITHUB_ENV
+          fi
+
       - name: Install cibuildwheel
         run: pip install cibuildwheel
 
       - name: Build wheels with cibuildwheel
         env:
-          CIBW_MANYLINUX_X86_64_IMAGE: "${{ matrix.os == 'ubuntu-latest' ? 'manylinux_2_28' : '' }}"
-          CIBW_BEFORE_BUILD: "${{ matrix.os == 'ubuntu-latest' ? 'yum -y install eigen3-devel || true' : '' }}"
           EIGEN3_INCLUDE_DIR: "${{ github.workspace }}/vendor/eigen3"
           CIBW_BUILD: "cp39* cp310* cp311* cp312* cp313*"
-          CIBW_SKIP: "${{ matrix.os == 'ubuntu-latest' ? 'cp39-manylinux_i686* cp310-manylinux_i686* cp311-manylinux_i686* cp312-manylinux_i686* cp313-manylinux_i686*' : '' }}"
         run: cibuildwheel --output-dir wheelhouse .
 
       - name: Upload wheels artifact

@@ -14,7 +14,7 @@ You can install the released version of `learner` from
 [PyPi](https://pypi.org/project/learner_py/) with:
 
 ```python
-pip install learner_py
+pip install learner-py
 ```
 #### LEARNER Method
 
@@ -47,7 +47,7 @@ We illustrate an example of how `learner` can be used. We first load the
 package.
 
 ```python
-import learner_py as pylearner
+import learner-py as pylearner
 ```
 
 In this illustration, we will use one of the toy data sets in the
@@ -123,6 +123,3 @@ print(res_dlearner['dlearner_estimate'][0:4, 0:4])
  [-0.72372751  0.86634922 -0.43528206  1.10580219]
  [ 1.63476957 -2.91985925  0.04876288 -2.35750409]]
 ```
-
-
-

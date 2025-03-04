@@ -64,6 +64,7 @@ ext_modules = [
 setup(
     name='learner_py',
     version='0.1.0',
+    author='Sean McGrath, Ryan ODea, Cenhao Zhu, and Rui Duan',
     maintainer='Sean McGrath',
     maintainer_email='sean.mcgrath514@gmail.com',
     description=("""Implements transfer learning methods for low-rank matrix estimation.

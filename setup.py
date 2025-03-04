@@ -20,11 +20,27 @@ if sys.platform == "darwin":
 else:
     extra_compile_args = ['-O3', '-std=c++14', '-fopenmp']
     extra_link_args = ['-fopenmp']
-    
-eigen_include_dir = os.getenv("EIGEN3_INCLUDE_DIR", "/opt/homebrew/include/eigen3")
-if not os.path.exists(eigen_include_dir):
-    print(f"Warning: Could not locate Eigen directory at {eigen_include_dir}. Please ensure Eigen is installed.")
+
+eigen_include_dir = os.getenv("EIGEN3_INCLUDE_DIR")
+if eigen_include_dir and os.path.exists(eigen_include_dir):
+    pass
+else:
+
+    possible_paths = [
+        "/opt/homebrew/include/eigen3",    # macOS Homebrew (Apple Silicon)
+        "/usr/local/include/eigen3",       # macOS Intel
+        "/usr/include/eigen3"              # Linux
+    ]
     eigen_include_dir = None
+    for path in possible_paths:
+        if os.path.exists(path):
+            eigen_include_dir = path
+            break
+
+if eigen_include_dir:
+    print(f"Using Eigen directory: {eigen_include_dir}")
+else:
+    print("Warning: Could not locate Eigen directory. Please ensure Eigen is installed.")
 
 include_dirs = [
     get_pybind_include(),

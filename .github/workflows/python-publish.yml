@@ -17,7 +17,7 @@ jobs:
       - name: Install cibuildwheel
         run: pip install cibuildwheel
 
-      # macOS dependencies: install Eigen and libomp via Homebrew.
+      # macOS: Install Eigen and libomp via Homebrew.
       - name: Install dependencies on macOS
         if: runner.os == 'macOS'
         run: |
@@ -25,7 +25,7 @@ jobs:
           brew install eigen
           brew install libomp
 
-      # Windows: Download Eigen if it's not already vendored.
+      # Windows: Download Eigen if it isn’t already vendored.
       - name: Download Eigen on Windows
         if: runner.os == 'Windows'
         shell: pwsh
@@ -50,20 +50,20 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: ""
           CIBW_BEFORE_BUILD: ""
           EIGEN3_INCLUDE_DIR: "${{ github.workspace }}/vendor/eigen3"
-          # For macOS, you can build all targeted CP versions (if available on the runner).
           CIBW_BUILD: "cp39* cp310* cp311* cp312* cp313*"
           CIBW_SKIP: ""
         run: cibuildwheel --output-dir wheelhouse .
         shell: bash
 
-      # Ubuntu build step: Use manylinux_2_28 and install Eigen3 via yum.
-      # Exclude cp312 and cp313 because the manylinux container doesn't provide them.
+      # Ubuntu build step: Use manylinux_2_28 and vendor Eigen if missing.
       - name: Build wheels with cibuildwheel (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         env:
           CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_28"
-          CIBW_BEFORE_BUILD: "yum -y install eigen3-devel || true"
+          # If vendor/eigen3 doesn't exist, download and extract Eigen 3.4.0.
+          CIBW_BEFORE_BUILD: "if [ ! -d vendor/eigen3 ]; then mkdir -p vendor && curl -L https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip -o eigen.zip && unzip eigen.zip -d vendor && mv vendor/eigen-3.4.0 vendor/eigen3; fi"
           EIGEN3_INCLUDE_DIR: "${{ github.workspace }}/vendor/eigen3"
+          # Limit Ubuntu wheels to the available CP versions in the manylinux container.
           CIBW_BUILD: "cp39* cp310* cp311*"
           CIBW_SKIP: "cp39-manylinux_i686* cp310-manylinux_i686* cp311-manylinux_i686*"
         run: cibuildwheel --output-dir wheelhouse .

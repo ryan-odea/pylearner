@@ -1,4 +1,4 @@
-name: learner_py
+name: learner-py
 
 on:
   release:

@@ -1,6 +1,5 @@
 import os
 import sys
-import setuptools
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 import numpy as np
@@ -21,9 +20,10 @@ if sys.platform == "darwin":
 else:
     extra_compile_args = ['-O3', '-std=c++14', '-fopenmp']
     extra_link_args = ['-fopenmp']
-
-eigen_include_dir = '/opt/homebrew/include/eigen3'
+    
+eigen_include_dir = os.getenv("EIGEN3_INCLUDE_DIR", "/opt/homebrew/include/eigen3")
 if not os.path.exists(eigen_include_dir):
+    print(f"Warning: Could not locate Eigen directory at {eigen_include_dir}. Please ensure Eigen is installed.")
     eigen_include_dir = None
 
 include_dirs = [
@@ -33,8 +33,6 @@ include_dirs = [
 ]
 if eigen_include_dir:
     include_dirs.append(eigen_include_dir)
-else:
-    print("Warning: Could not locate Eigen directory. Please ensure Eigen is installed.")
 
 ext_modules = [
     Extension(
@@ -48,7 +46,7 @@ ext_modules = [
 ]
 
 setup(
-    name='pylearner',
+    name='learner_py',
     version='0.1.0',
     maintainer='Sean McGrath',
     maintainer_email='sean.mcgrath514@gmail.com',
@@ -74,3 +72,4 @@ setup(
     cmdclass={'build_ext': build_ext},
     zip_safe=False
 )
+

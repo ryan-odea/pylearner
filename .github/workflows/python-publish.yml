@@ -37,7 +37,7 @@ jobs:
             Write-Host "Eigen already exists."
           }
 
-      # macOS build: Force x86_64 and set OpenMP flags using libomp from Homebrew.
+      # macOS build: Force x86_64 and set OpenMP flags.
       - name: Build wheels with cibuildwheel (macOS)
         if: matrix.os == 'macos-latest'
         env:
@@ -65,11 +65,11 @@ jobs:
         run: cibuildwheel --output-dir wheelhouse .
         shell: bash
 
-      # Windows build step: Force x86_64 and skip win32 builds.
+      # Windows build step: Force AMD64 and skip win32 builds.
       - name: Build wheels with cibuildwheel (Windows)
         if: matrix.os == 'windows-latest'
         env:
-          CIBW_ARCHS: "x86_64"
+          CIBW_ARCHS: "AMD64"
           CIBW_MANYLINUX_X86_64_IMAGE: ""
           CIBW_BEFORE_BUILD: ""
           EIGEN3_INCLUDE_DIR: "${{ github.workspace }}/vendor/eigen3"

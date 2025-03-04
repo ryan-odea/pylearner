@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
 
       # [[Debug]]: list the vendored Eigen directory
-      - name: Debug: List vendored Eigen directory
+      - name: List vendored Eigen directory
         run: |
           if [ -d vendor/eigen3 ]; then
               echo "Found vendored Eigen at vendor/eigen3"

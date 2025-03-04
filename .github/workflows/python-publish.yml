@@ -1,4 +1,4 @@
-name: learner-py
+name: Build Wheels and Publish
 
 on:
   release:
@@ -6,52 +6,60 @@ on:
 
 jobs:
   build_wheels:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: List host Eigen directories
-        run: |
-          echo "Listing /usr/include/eigen3:"
-          ls /usr/include/eigen3 || echo "Not found"
-          echo "Listing /usr/local/include/eigen3:"
-          ls /usr/local/include/eigen3 || echo "Not found"
-
       - name: Install cibuildwheel
         run: pip install cibuildwheel
 
-      - name: Build manylinux wheels with cibuildwheel
+      - name: Build wheels with cibuildwheel
         env:
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
-          CIBW_BEFORE_BUILD: "yum -y install eigen3-devel || true"
-          EIGEN3_INCLUDE_DIR: /usr/include/eigen3
-          # Build only CPython versions 3.9 and above.
+          EIGEN3_INCLUDE_DIR: ${{ github.workspace }}/vendor/eigen3
           CIBW_BUILD: "cp39* cp310* cp311* cp312* cp313*"
-          CIBW_SKIP: "cp36-* cp37-* cp38-* cp39-manylinux_i686* cp310-manylinux_i686* cp311-manylinux_i686* cp312-manylinux_i686* cp313-manylinux_i686* cp39-musllinux_* cp310-musllinux_* cp311-musllinux_* cp312-musllinux_* cp313-musllinux_*"
+          CIBW_SKIP: ${{ matrix.os == 'ubuntu-latest' && "cp36-* cp37-* cp38-* cp39-manylinux_i686* cp310-manylinux_i686* cp311-manylinux_i686* cp312-manylinux_i686* cp313-manylinux_i686*" || "" }}
+          CIBW_BEFORE_BUILD: ${{ matrix.os == 'ubuntu-latest' && "yum -y install eigen3-devel || true" || "" }}
         run: cibuildwheel --output-dir wheelhouse .
 
       - name: Upload wheels artifact
         uses: actions/upload-artifact@v4
         with:
-          name: wheelhouse
+          name: wheels-${{ matrix.os }}
           path: wheelhouse
 
-  pypi-publish:
+  pypi_publish:
     runs-on: ubuntu-latest
     needs: build_wheels
-    permissions:
-      id-token: write
-    environment:
-      name: pypi
     steps:
-      - name: Download wheels artifact
+      - name: Create directory for combined wheels
+        run: mkdir -p combined_wheels
+
+      - name: Download wheels artifact from Ubuntu
         uses: actions/download-artifact@v4
         with:
-          name: wheelhouse
-          path: wheelhouse
+          name: wheels-ubuntu-latest
+          path: combined_wheels
+
+      - name: Download wheels artifact from macOS
+        uses: actions/download-artifact@v4
+        with:
+          name: wheels-macos-latest
+          path: combined_wheels
+
+      - name: Download wheels artifact from Windows
+        uses: actions/download-artifact@v4
+        with:
+          name: wheels-windows-latest
+          path: combined_wheels
 
       - name: Publish wheels to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: combined_wheels
+
         with:
           packages-dir: wheelhouse

@@ -17,17 +17,33 @@ jobs:
       - name: Install cibuildwheel
         run: pip install cibuildwheel
 
-      - name: Install Eigen on macOS
+      - name: Install Eigen and libomp on macOS
         if: runner.os == 'macOS'
         run: |
           brew update
           brew install eigen
           brew install libomp
 
+      - name: Download Eigen on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (-Not (Test-Path -Path "./vendor/eigen3")) {
+            Write-Host "Downloading Eigen..."
+            Invoke-WebRequest -Uri "https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip" -OutFile "eigen.zip"
+            Expand-Archive -Path "eigen.zip" -DestinationPath "./vendor"
+            Rename-Item -Path "./vendor/eigen-3.4.0" -NewName "eigen3"
+          } else {
+            Write-Host "Eigen already exists."
+          }
+
       - name: Build wheels with cibuildwheel (macOS)
         if: matrix.os == 'macos-latest'
         env:
           CIBW_ARCHS: x86_64
+          CFLAGS: "-Xpreprocessor -fopenmp -I/opt/homebrew/include"
+          CXXFLAGS: "-Xpreprocessor -fopenmp -I/opt/homebrew/include"
+          LDFLAGS: "-L/opt/homebrew/lib -lomp"
           CIBW_MANYLINUX_X86_64_IMAGE: ""
           CIBW_BEFORE_BUILD: ""
           EIGEN3_INCLUDE_DIR: "${{ github.workspace }}/vendor/eigen3"

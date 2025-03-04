@@ -1,6 +1,6 @@
-# pylearner
+# learner_py
 
-The `pylearner` package implements transfer learning methods for low-rank
+The `learner_py` package implements transfer learning methods for low-rank
 matrix estimation. These methods leverage similarity in the latent row
 and column spaces between the source and target populations to improve
 estimation in the target population. The methods include the LatEnt
@@ -11,10 +11,10 @@ al. (2024)](https://doi.org/10.48550/arXiv.2412.20605).
 ## Installation
 
 You can install the released version of `learner` from
-[PyPi](https://pypi.org/project/pylearner/) with:
+[PyPi](https://pypi.org/project/learner_py/) with:
 
 ```python
-pip install pylearner
+pip install learner_py
 ```
 #### LEARNER Method
 
@@ -47,7 +47,7 @@ We illustrate an example of how `learner` can be used. We first load the
 package.
 
 ```python
-import pylearner
+import learner_py as pylearner
 ```
 
 In this illustration, we will use one of the toy data sets in the

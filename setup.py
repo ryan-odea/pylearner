@@ -87,7 +87,8 @@ setup(
     ],
     setup_requires=[
         'numpy>=1.15',
-        'pybind11>=2.6.0'
+        'pybind11>=2.6.0',
+        'screenot>=0.0.2'
     ],
     cmdclass={'build_ext': build_ext},
     zip_safe=False

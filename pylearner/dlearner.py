@@ -1,5 +1,5 @@
 import numpy as np
-from .screenot import adaptiveHardThresholding
+from screenot import adaptiveHardThresholding
 
 def dlearner(Y_source, Y_target, r=None):
     """

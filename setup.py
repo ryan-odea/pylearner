@@ -66,7 +66,7 @@ ext_modules = [
 
 setup(
     name='learner-py',
-    version='1.0.1',
+    version='1.0.2',
     author='Sean McGrath, Ryan ODea, Cenhao Zhu, and Rui Duan',
     maintainer='Sean McGrath',
     maintainer_email='sean.mcgrath514@gmail.com',
@@ -83,7 +83,8 @@ setup(
     install_requires=[
         'numpy>=1.15',
         'pandas>=1.0',
-        'pybind11>=2.6.0'
+        'pybind11>=2.6.0',
+        'screenot>=0.0.2'
     ],
     setup_requires=[
         'numpy>=1.15',

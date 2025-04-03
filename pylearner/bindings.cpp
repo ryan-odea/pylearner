@@ -52,12 +52,10 @@ PYBIND11_MODULE(learner_ext, m) {
                 }
             }
 
-            // Determine rank: if r is None, use adaptive thresholding in (local) screenot.
-            // when screeNOT is working as a python package, perhaps switch there.
             int r_val;
             if (r.is_none()) {
-                py::module screenot = py::module::import("pylearner.screenot");
-                double max_rank = std::min(Y_source.rows(), Y_source.cols()) / 3.0;
+                py::module screenot = py::module::import("screenot");
+                int max_rank = static_cast<int>(std::min(Y_source.rows(), Y_source.cols()) / 3.0);
                 py::object result_obj = screenot.attr("adaptiveHardThresholding")(Y_source, max_rank);
                 py::tuple result_tuple = result_obj.cast<py::tuple>();
                 r_val = std::max(result_tuple[2].cast<int>(), 1);
@@ -133,8 +131,8 @@ dict
         {
             int r_val;
             if (r.is_none()) {
-                py::module screenot = py::module::import("pylearner.screenot");
-                double max_rank = std::min(Y_source.rows(), Y_source.cols()) / 3.0;
+                py::module screenot = py::module::import("screenot");
+                int max_rank = static_cast<int>(std::min(Y_source.rows(), Y_source.cols()) / 3.0);
                 py::object result_obj = screenot.attr("adaptiveHardThresholding")(Y_source, max_rank);
                 py::tuple result_tuple = result_obj.cast<py::tuple>();
                 r_val = std::max(result_tuple[2].cast<int>(), 1);

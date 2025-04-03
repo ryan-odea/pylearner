@@ -7,7 +7,6 @@ omp_max_threads = learner_ext.omp_max_threads
 
 import importlib
 dlearner = importlib.import_module("pylearner.dlearner").dlearner
-adaptiveHardThresholding = importlib.import_module("pylearner.screenot").adaptiveHardThresholding
 
 if omp_max_threads() < 2:
     warning_message = (
@@ -25,4 +24,4 @@ __all__ = [
     "dlearner"
 ]
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"

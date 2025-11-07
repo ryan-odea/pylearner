@@ -15,10 +15,10 @@ class get_pybind_include(object):
         return pybind11.get_include(self.user)
 
 if sys.platform == "darwin":
-    extra_compile_args = ['-O3', '-std=c++11', '-Xpreprocessor', '-fopenmp']
+    extra_compile_args = ['-O3', '-std=c++17', '-Xpreprocessor', '-fopenmp']
     extra_link_args = ['-lomp']
 else:
-    extra_compile_args = ['-O3', '-std=c++14', '-fopenmp']
+    extra_compile_args = ['-O3', '-std=c++17', '-fopenmp']
     extra_link_args = ['-fopenmp']
 
 vendored_eigen = os.path.join(os.path.dirname(__file__), "vendor", "eigen3")

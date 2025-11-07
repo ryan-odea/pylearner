@@ -66,10 +66,10 @@ ext_modules = [
 
 setup(
     name='learner-py',
-    version='1.0.2',
+    version='1.0.3',
     author='Sean McGrath, Ryan ODea, Cenhao Zhu, and Rui Duan',
     maintainer='Sean McGrath',
-    maintainer_email='sean.mcgrath514@gmail.com',
+    maintainer_email='ryan.odea@psi.ch',
     description=("""Implements transfer learning methods for low-rank matrix estimation.
                  These methods leverage similarity in the latent row and column spaces between
                  the source and target populations to improve estimation in the target population. 

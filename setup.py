@@ -66,7 +66,7 @@ ext_modules = [
 
 setup(
     name='learner-py',
-    version='1.0.3',
+    version='1.0.4',
     author='Sean McGrath, Ryan ODea, Cenhao Zhu, and Rui Duan',
     maintainer='Sean McGrath',
     maintainer_email='ryan.odea@psi.ch',
